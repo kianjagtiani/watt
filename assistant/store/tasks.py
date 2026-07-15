@@ -48,3 +48,10 @@ def update_task(conn, phone, task_id, text=None, category=None) -> bool:
     )
     conn.commit()
     return cur.rowcount > 0
+
+
+def get_task(conn, phone, task_id) -> sqlite3.Row | None:
+    return conn.execute(
+        "SELECT * FROM tasks WHERE id=? AND user_phone=?",
+        (task_id, phone),
+    ).fetchone()

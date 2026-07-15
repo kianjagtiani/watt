@@ -126,5 +126,5 @@ def dispatch(conn, settings, phone, call: ToolCall) -> dict:
 
 
 def _row_from_id(conn, phone, task_id) -> dict:
-    t = conn.execute("SELECT * FROM tasks WHERE id=?", (task_id,)).fetchone()
+    t = tasks.get_task(conn, phone, task_id)
     return _row(t)

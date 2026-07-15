@@ -20,3 +20,17 @@ def test_scoping_and_update():
     assert tasks.update_task(conn, "1555", tid, category="Errands")
     assert tasks.list_tasks(conn, "1555")[0]["category"] == "Errands"
     assert not tasks.update_task(conn, "1555", 999, text="x")
+
+
+def test_get_task():
+    conn = connect(":memory:")
+    tid = tasks.add_task(conn, "1555", "Pay rent", category="Bills")
+    # Returns row for owning phone
+    row = tasks.get_task(conn, "1555", tid)
+    assert row is not None
+    assert row["text"] == "Pay rent"
+    assert row["category"] == "Bills"
+    # Returns None for different phone
+    assert tasks.get_task(conn, "1666", tid) is None
+    # Returns None for non-existent id
+    assert tasks.get_task(conn, "1555", 999) is None
