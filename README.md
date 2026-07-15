@@ -1,6 +1,8 @@
 # Watt
 
-Watt is a to-do assistant that lives inside WhatsApp as its own contact. You text it tasks in plain English, it sorts them into categories, and it can research a task on request, pull a task out of a screenshot, or ping you with a reminder later. There's no app to install; you're just texting a number.
+Watt is a to-do assistant that lives inside WhatsApp as its own contact. I've always texted myself to-do lists, reminders, thoughts, opportunities, etc, and I thought it'd be useful to have an in-text assistant that organises everything in the chat. I also went ahead and added features that could take some action themselves, such as researching tasks or sending you reminders. 
+
+How it works: you text it tasks in plain English, it sorts them into categories, and it can research a task on request, pull a task out of a screenshot, or ping you with a reminder later. There's no app to install; you're just texting a number.
 
 Under the hood it's one FastAPI server talking to three things: the Meta WhatsApp Cloud API for messages, Gemini for understanding what you meant and deciding which tool to call, and a SQLite file for tasks, reminders, and per-user history. A reminder scheduler runs in-process and checks the database for anything due.
 
