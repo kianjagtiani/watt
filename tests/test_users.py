@@ -19,3 +19,12 @@ def test_mark_refused_once():
     conn = connect(":memory:")
     assert users.mark_refused(conn, "19998887777") is True
     assert users.mark_refused(conn, "19998887777") is False
+
+
+def test_readd_admin_does_not_demote():
+    conn = connect(":memory:")
+    users.add_user(conn, "15550001111", name="Kian", is_admin=True)
+    users.add_user(conn, "15550001111")
+    u = users.get_user(conn, "15550001111")
+    assert u["is_admin"] == 1
+    assert u["name"] == "Kian"

@@ -23,12 +23,25 @@ def test_complete_firing_oneoff_and_weekly():
     conn = connect(":memory:")
     one = reminders.add_reminder(conn, "1555", "meeting", NOW)
     wk = reminders.add_reminder(conn, "1555", "laundry", NOW, recurrence="weekly")
-    reminders.complete_firing(conn, one)
-    reminders.complete_firing(conn, wk)
+    reminders.complete_firing(conn, one, now=NOW)
+    reminders.complete_firing(conn, wk, now=NOW)
     active = reminders.list_reminders(conn, "1555")
     assert [r["id"] for r in active] == [wk]
     nxt = datetime.fromisoformat(active[0]["next_fire_at"])
     assert nxt == NOW + timedelta(days=7)
+
+
+def test_complete_firing_catch_up_after_sleep():
+    conn = connect(":memory:")
+    rid = reminders.add_reminder(
+        conn, "1555", "water plants", NOW - timedelta(days=5), recurrence="daily"
+    )
+    reminders.complete_firing(conn, rid, now=NOW)
+    active = reminders.list_reminders(conn, "1555")
+    assert [r["id"] for r in active] == [rid]
+    nxt = datetime.fromisoformat(active[0]["next_fire_at"])
+    assert nxt > NOW
+    assert nxt - NOW <= timedelta(days=1)
 
 
 def test_add_reminder_rejects_naive_datetime():

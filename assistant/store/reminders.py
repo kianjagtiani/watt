@@ -51,19 +51,25 @@ def due_reminders(conn, now: datetime) -> list[sqlite3.Row]:
     ).fetchall()
 
 
-def complete_firing(conn, reminder_id) -> None:
+def complete_firing(conn, reminder_id, now: datetime | None = None) -> None:
+    now = now or datetime.now(timezone.utc)
     row = conn.execute(
-        "SELECT next_fire_at, recurrence FROM reminders WHERE id=?", (reminder_id,)
+        "SELECT next_fire_at, recurrence FROM reminders WHERE id=? AND active=1",
+        (reminder_id,),
     ).fetchone()
     if row is None:
         return
     advance = _ADVANCE.get(row["recurrence"])
     if advance is None:
-        conn.execute("UPDATE reminders SET active=0 WHERE id=?", (reminder_id,))
-    else:
-        nxt = advance(datetime.fromisoformat(row["next_fire_at"]))
         conn.execute(
-            "UPDATE reminders SET next_fire_at=? WHERE id=?",
+            "UPDATE reminders SET active=0 WHERE id=? AND active=1", (reminder_id,)
+        )
+    else:
+        nxt = datetime.fromisoformat(row["next_fire_at"])
+        while nxt <= now:
+            nxt = advance(nxt)
+        conn.execute(
+            "UPDATE reminders SET next_fire_at=? WHERE id=? AND active=1",
             (nxt.isoformat(), reminder_id),
         )
     conn.commit()

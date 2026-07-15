@@ -26,6 +26,9 @@ def main():
         text, image = line, None
         if line.startswith("img:"):
             rest = line[4:].split(maxsplit=1)
+            if not rest or not pathlib.Path(rest[0]).is_file():
+                print("can't read that image path")
+                continue
             path = pathlib.Path(rest[0])
             text = rest[1] if len(rest) > 1 else None
             mime = mimetypes.guess_type(path.name)[0] or "image/png"

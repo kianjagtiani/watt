@@ -10,8 +10,10 @@ def add_user(conn, phone, name="", timezone_name="America/Los_Angeles", is_admin
     conn.execute(
         "INSERT INTO users (phone, name, is_admin, timezone, created_at)"
         " VALUES (?, ?, ?, ?, ?)"
-        " ON CONFLICT(phone) DO UPDATE SET name=excluded.name,"
-        " is_admin=excluded.is_admin, timezone=excluded.timezone",
+        " ON CONFLICT(phone) DO UPDATE SET"
+        " name=CASE WHEN excluded.name='' THEN users.name ELSE excluded.name END,"
+        " is_admin=MAX(users.is_admin, excluded.is_admin),"
+        " timezone=excluded.timezone",
         (phone, name, int(is_admin), timezone_name, _now()),
     )
     conn.commit()

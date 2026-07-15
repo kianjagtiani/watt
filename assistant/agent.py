@@ -1,9 +1,12 @@
 import json
+import logging
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
 from assistant import tools
 from assistant.store import history, reminders, tasks, users
+
+log = logging.getLogger(__name__)
 
 MAX_TURNS = 6
 ERR_LLM = "Hit a snag talking to my brain — try again in a minute 🙃"
@@ -69,6 +72,7 @@ def handle_message(conn, settings, llm, phone, text=None, image=None) -> str:
         try:
             resp = llm.chat(system, convo, tools.TOOL_DEFS)
         except Exception:
+            log.exception("llm call failed")
             reply = ERR_LLM
             break
         if not resp.tool_calls:

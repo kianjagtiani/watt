@@ -20,7 +20,7 @@ def check_and_fire(conn, settings, wa, now: datetime | None = None) -> None:
                 wa.send_template(phone, settings.reminder_template, [text])
         except Exception:
             log.exception("failed to send reminder %s to %s", r["id"], phone)
-        reminders.complete_firing(conn, r["id"])
+        reminders.complete_firing(conn, r["id"], now=now)
 
 
 def start(conn, settings, wa) -> BackgroundScheduler:
