@@ -1,5 +1,7 @@
 from datetime import datetime, timedelta, timezone
 
+import pytest
+
 from assistant.db import connect
 from assistant.store import reminders
 
@@ -27,3 +29,17 @@ def test_complete_firing_oneoff_and_weekly():
     assert [r["id"] for r in active] == [wk]
     nxt = datetime.fromisoformat(active[0]["next_fire_at"])
     assert nxt == NOW + timedelta(days=7)
+
+
+def test_add_reminder_rejects_naive_datetime():
+    conn = connect(":memory:")
+    naive_dt = datetime(2026, 7, 14, 12, 0)  # no tzinfo
+    with pytest.raises(ValueError, match="next_fire_at must be tz-aware"):
+        reminders.add_reminder(conn, "1555", "test", naive_dt)
+
+
+def test_due_reminders_rejects_naive_datetime():
+    conn = connect(":memory:")
+    naive_dt = datetime(2026, 7, 14, 12, 0)  # no tzinfo
+    with pytest.raises(ValueError, match="now must be tz-aware"):
+        reminders.due_reminders(conn, naive_dt)
