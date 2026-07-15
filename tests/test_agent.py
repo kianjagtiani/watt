@@ -66,3 +66,13 @@ def test_llm_error_message():
     conn = _conn()
     reply = agent.handle_message(conn, SETTINGS, BoomLLM(), "1555", text="hi")
     assert "snag" in reply
+
+
+def test_reminder_time_localization_instruction():
+    conn = _conn()
+    llm = FakeLLM([LLMResponse("Got it", [])])
+    agent.handle_message(conn, SETTINGS, llm, "1555", text="hi")
+    system = llm.calls[0][0]
+    assert "convert" in system
+    assert "UTC" in system
+    assert "local timezone" in system

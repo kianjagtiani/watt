@@ -24,6 +24,8 @@ look something up. Never research proactively.
 actionable item(s), add them with source=screenshot, and confirm what you added.
 - Reminder times: the user speaks in their local timezone ({tz}). \
 Current local time: {now}.
+- When telling the user about a reminder time, convert it from the UTC value \
+shown below to their local timezone ({tz}).
 - Only the admin may manage users.
 
 {name}'s open tasks (id — [category] text):
