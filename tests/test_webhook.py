@@ -83,3 +83,13 @@ def test_image_message_downloads_media():
            "image": {"id": "MEDIA1", "caption": "this job"}}
     client.post("/webhook", json=_payload(msg))
     assert handled == [("1555", "this job", (b"img", "image/jpeg"))]
+
+
+def test_malformed_message_still_returns_200():
+    client, wa, handled = _setup()
+    # Missing required keys: id, from, type
+    malformed_msg = {"garbage": True}
+    r = client.post("/webhook", json=_payload(malformed_msg))
+    assert r.status_code == 200
+    assert wa.sent == []
+    assert handled == []

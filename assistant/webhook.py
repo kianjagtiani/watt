@@ -1,7 +1,11 @@
+import logging
+
 from fastapi import BackgroundTasks, FastAPI, Request, Response
 from fastapi.responses import PlainTextResponse
 
 from assistant.store import users
+
+log = logging.getLogger(__name__)
 
 REFUSAL = ("Hi! I'm a private assistant and can't chat with new numbers. "
            "Ask my admin for access if you know them 🙂")
@@ -28,7 +32,10 @@ def create_app(settings, conn, wa, handler) -> FastAPI:
         for entry in body.get("entry", []):
             for change in entry.get("changes", []):
                 for msg in change.get("value", {}).get("messages", []):
-                    _route(msg, background)
+                    try:
+                        _route(msg, background)
+                    except Exception:
+                        log.exception("failed to route message")
         return {"status": "ok"}
 
     def _route(msg, background):
