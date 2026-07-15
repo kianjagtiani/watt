@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+httpx
+google-genai
+ddgs
+apscheduler
+python-dateutil
+python-dotenv
+pytest
