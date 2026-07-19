@@ -15,6 +15,18 @@ def test_roles_map_to_gemini():
     assert contents[3].parts[0].text == "Added!"
 
 
+def test_thought_signature_round_trips():
+    msgs = [
+        {"role": "assistant", "tool_calls": [
+            ToolCall("add_tasks", {"items": []}, thought_signature=b"sig-bytes"),
+            ToolCall("set_reminder", {"text": "x"}),
+        ]},
+    ]
+    (c,) = _to_contents(msgs)
+    assert c.parts[0].thought_signature == b"sig-bytes"
+    assert c.parts[1].thought_signature is None
+
+
 def test_image_message_becomes_two_parts():
     msgs = [{"role": "user", "content": "job posting", "image": (b"\x89PNG", "image/png")}]
     (c,) = _to_contents(msgs)

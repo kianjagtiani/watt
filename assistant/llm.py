@@ -8,6 +8,8 @@ from google.genai import types
 class ToolCall:
     name: str
     args: dict
+    # Gemini 3 rejects replayed function calls without their thought signature.
+    thought_signature: bytes | None = None
 
 
 @dataclass
@@ -26,10 +28,11 @@ def _to_contents(messages: list[dict]) -> list[types.Content]:
             contents.append(types.Content(role="user", parts=parts))
         elif m["role"] == "assistant":
             if m.get("tool_calls"):
-                parts = [
-                    types.Part.from_function_call(name=c.name, args=c.args)
-                    for c in m["tool_calls"]
-                ]
+                parts = []
+                for c in m["tool_calls"]:
+                    p = types.Part.from_function_call(name=c.name, args=c.args)
+                    p.thought_signature = c.thought_signature
+                    parts.append(p)
             else:
                 parts = [types.Part.from_text(text=m["content"])]
             contents.append(types.Content(role="model", parts=parts))
@@ -67,7 +70,11 @@ class GeminiProvider:
         text_parts, calls = [], []
         for part in resp.candidates[0].content.parts:
             if part.function_call:
-                calls.append(ToolCall(part.function_call.name, dict(part.function_call.args)))
+                calls.append(ToolCall(
+                    part.function_call.name,
+                    dict(part.function_call.args),
+                    part.thought_signature,
+                ))
             elif part.text:
                 text_parts.append(part.text)
         return LLMResponse("\n".join(text_parts) or None, calls)
